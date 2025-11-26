@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 
+from typing import Literal, Optional
+
 from nnunet_mednext.network_architecture.mednextv1.blocks import *
 
 class MedNeXt(nn.Module):
@@ -12,17 +14,17 @@ class MedNeXt(nn.Module):
         n_classes: int, 
         exp_r: int = 4,                            # Expansion ratio as in Swin Transformers
         kernel_size: int = 7,                      # Ofcourse can test kernel_size
-        enc_kernel_size: int = None,
-        dec_kernel_size: int = None,
+        enc_kernel_size: Optional[int] = None,
+        dec_kernel_size: Optional[int] = None,
         deep_supervision: bool = False,             # Can be used to test deep supervision
         do_res: bool = False,                       # Can be used to individually test residual connection
         do_res_up_down: bool = False,             # Additional 'res' connection on up and down convs
-        checkpoint_style: bool = None,            # Either inside block or outside block
-        block_counts: list = [2,2,2,2,2,2,2,2,2], # Can be used to test staging ratio: 
+        checkpoint_style: Optional[Literal["outside_block"]] = None,            # Either inside block or outside block
+        block_counts: list[int] = [2,2,2,2,2,2,2,2,2], # Can be used to test staging ratio: 
                                             # [3,3,9,3] in Swin as opposed to [2,2,2,2,2] in nnUNet
-        norm_type = 'group',
-        dim = '3d',                                # 2d or 3d
-        grn = False
+        norm_type: Literal["group"] = 'group',
+        dim: Literal["2d", "3d"] = '3d',                                # 2d or 3d
+        grn: bool = False
     ):
 
         super().__init__()
@@ -419,7 +421,6 @@ if __name__ == "__main__":
     print(count_parameters(network))
 
     from fvcore.nn import FlopCountAnalysis
-    from fvcore.nn import parameter_count_table
 
     # model = ResTranUnet(img_size=128, in_channels=1, num_classes=14, dummy=False).cuda()
     x = torch.zeros((1,1,64,64,64), requires_grad=False).cuda()
